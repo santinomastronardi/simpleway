@@ -211,42 +211,23 @@ a { color: inherit; text-decoration: none; }
   display: block;
   border-radius: 4px;
 }
-.nav-logo-text {
-  position: relative;
-  display: inline-flex;
-  overflow: hidden;
-  height: 24px;
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  line-height: 24px;
-}
+/* nav-logo-text + flip effect eliminados: ahora la nav-logo es sólo
+   el ícono clickeable. Hover sutil sobre el ícono. */
+.nav-logo:hover .nav-logo-mark img { transform: scale(1.05); }
+.nav-logo-mark img { transition: transform 0.25s ease; }
+.nav-logo-text { display: none; }
 /* Cada .letter es un mini-grid de 2 filas: top arriba, bottom abajo.
    Como ambos hijos comparten celda en columna 1fr, el ancho de cada
    .letter se ajusta al MÁS ANCHO entre top y bottom — sin esto, los
    chars de "CONSULTORÍA SAP" colapsan sobre los del "Simple Way"
    que es más corto. */
-.nav-logo-text .letter {
-  display: inline-grid;
-  grid-template-rows: 24px 24px;
-  grid-template-columns: minmax(0, max-content);
-  height: 24px;
-  overflow: hidden;
-  vertical-align: top;
-}
-.nav-logo-text .letter .top,
-.nav-logo-text .letter .bottom {
-  grid-column: 1;
-  display: block;
-  line-height: 24px;
+.nav-logo-text .letter, .nav-logo-text .letter .top, .nav-logo-text .letter .bottom { display: none !important; }
+.__removed_logo_flip_unused {
+  display: none;
   white-space: pre; /* preserva los   (nbsp) que usamos como espacios */
   transition: transform 0.45s cubic-bezier(0.7, 0, 0.3, 1);
   will-change: transform;
 }
-.nav-logo-text .letter .top    { grid-row: 1; }
-.nav-logo-text .letter .bottom { grid-row: 2; }
-.nav-logo:hover .letter .top,
-.nav-logo:hover .letter .bottom { transform: translateY(-24px); }
 
 .nav-links {
   display: flex;
@@ -894,13 +875,34 @@ a { color: inherit; text-decoration: none; }
   color: rgba(255,255,255,0.35);
   letter-spacing: 0.06em;
 }
-.diff-progress span {
+.diff-progress > * {
   padding: 6px 0;
   border-top: 1px solid rgba(255,255,255,0.18);
   min-width: 40px;
-  transition: color 0.4s ease, border-color 0.4s ease;
+  transition: color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+  /* Reset de button: el paginador es ahora interactivo (click → scroll
+     al diff-reason correspondiente). */
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  color: rgba(255,255,255,0.35);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  text-align: left;
 }
-.diff-progress span.is-active {
+.diff-progress > *:hover {
+  color: rgba(255,255,255,0.85);
+  border-color: rgba(255,255,255,0.6);
+  transform: translateY(-1px);
+}
+.diff-progress > *:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+.diff-progress > *.is-active {
   color: #fff;
   border-color: #fff;
 }
@@ -1106,6 +1108,42 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: 0.04em;
 }
 .cases-pagination em { color: #000; font-style: normal; }
+.cases-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  pointer-events: auto;
+}
+.cases-arrow {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #fff;
+  color: #000;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.cases-arrow:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.cases-arrow:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.cases-arrow:disabled:hover {
+  background: #fff;
+  border-color: rgba(0,0,0,0.12);
+  color: #000;
+  transform: none;
+}
+.cases-arrow svg { width: 18px; height: 18px; }
 .cases-track {
   display: flex;
   width: 200%;
@@ -1216,16 +1254,26 @@ a { color: inherit; text-decoration: none; }
   padding: 140px 80px;
   border-bottom: 1px solid var(--line);
   background: #fff;
-  /* Ancla #equipo: compensa el padding-top alto para que el título
-     no quede tan abajo en pantalla al hacer click en el nav. */
-  scroll-margin-top: -90px;
+  /* Ancla #equipo: compensa casi todo el padding-top de 140px para
+     que el título "Nuestros socios" quede pegado arriba con un poco
+     de aire (ver screenshot de referencia del usuario). */
+  scroll-margin-top: -130px;
 }
 .team-headline {
   font-weight: 600;
   font-size: 56px;
-  line-height: 1;
+  line-height: 1.05;
   letter-spacing: -0.03em;
   margin-top: 12px;
+  max-width: 900px;
+}
+.team-sub {
+  font-weight: 300;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  max-width: 760px;
+  margin-top: 24px;
 }
 .team-grid {
   display: grid;
@@ -1779,6 +1827,8 @@ a { color: inherit; text-decoration: none; }
   .case-row  { opacity: 1 !important; transform: none !important; }
   .case-row::before { display: none; }
   .cases-pagination { display: none; }
+  .cases-nav { gap: 8px; }
+  .cases-arrow { width: 36px; height: 36px; }
   .cases-headline,
   .team-headline,
   .section-headline { font-size: 36px; }
@@ -1920,9 +1970,8 @@ a { color: inherit; text-decoration: none; }
 
 <!-- NAV -->
 <nav class="nav">
-  <div class="nav-logo" id="navLogo">
+  <div class="nav-logo" id="navLogo" role="button" tabindex="0" aria-label="Volver al inicio">
     <div class="nav-logo-mark"><img src="ChatGPT%20Image%2015%20may%202026%2C%2001_32_53%20a.m..png" alt="Simple Way"></div>
-    <div class="nav-logo-text" id="navLogoText"></div>
   </div>
   <div class="nav-links">
     <a href="#servicios">Servicios</a>
@@ -1936,11 +1985,11 @@ a { color: inherit; text-decoration: none; }
 <section class="hero">
   <div class="hero-content">
     <div class="hero-tag mono">// NEPTUNE SOFTWARE PARTNER · BS.AS.</div>
-    <h1 class="hero-headline" id="heroHeadline">SAP que funciona para el negocio real.</h1>
-    <h2 class="hero-sub-headline" id="heroSubHeadline">Sin excusas. Sin estimaciones que no se cumplen.</h2>
-    <p class="hero-para" id="heroPara">Implementaciones, soporte y desarrollo SAP para empresas que no pueden permitirse que sus operaciones fallen.</p>
+    <h1 class="hero-headline" id="heroHeadline">SAP que impulsa resultados</h1>
+    <h2 class="hero-sub-headline" id="heroSubHeadline">Procesos eficientes. Equipos productivos. Operaciones sin interrupciones.</h2>
+    <p class="hero-para" id="heroPara">Implementamos, optimizamos y desarrollamos sobre SAP. Sin estimaciones irreales, sin proyectos eternos, sin depender de múltiples proveedores. Un único equipo especializado para todo el ciclo de tu ecosistema SAP.</p>
     <div class="hero-cta" id="heroCta">
-      <a href="https://wa.me/5491133871836?text=Hola%2C%20quer%C3%ADa%20un%20diagn%C3%B3stico%20SAP%20gratuito" target="_blank" rel="noopener" class="btn btn-primary">Diagnóstico gratuito →</a>
+      <a href="#contacto" class="btn btn-primary">Agendar una reunión →</a>
       <a href="#casos" class="btn btn-ghost">Ver casos de éxito</a>
     </div>
     <div class="hero-stats" id="heroStats">
@@ -2042,10 +2091,10 @@ a { color: inherit; text-decoration: none; }
       <h2 class="diff-headline">Por qué eligen<br>Simple Way</h2>
       <p class="diff-sub">Consultores especializados, no generalistas.</p>
       <div class="diff-progress" id="diffProgress">
-        <span data-step="1">/ 01</span>
-        <span data-step="2">/ 02</span>
-        <span data-step="3">/ 03</span>
-        <span data-step="4">/ 04</span>
+        <button type="button" data-step="1" aria-label="Ir al diferenciador 1">/ 01</button>
+        <button type="button" data-step="2" aria-label="Ir al diferenciador 2">/ 02</button>
+        <button type="button" data-step="3" aria-label="Ir al diferenciador 3">/ 03</button>
+        <button type="button" data-step="4" aria-label="Ir al diferenciador 4">/ 04</button>
       </div>
     </div>
   </aside>
@@ -2095,9 +2144,21 @@ a { color: inherit; text-decoration: none; }
     <div class="cases-header">
       <div>
         <span class="cases-label">// Casos de éxito</span>
-        <h2 class="cases-headline">Resultados reales.<br>No promesas.</h2>
+        <h2 class="cases-headline">Transformamos desafíos operativos<br>en resultados medibles</h2>
       </div>
-      <div class="cases-pagination"><em id="casesCurrentNum">1</em> / 2</div>
+      <div class="cases-nav" aria-label="Navegación de casos">
+        <button type="button" class="cases-arrow" id="casesPrev" aria-label="Caso anterior">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        <div class="cases-pagination"><em id="casesCurrentNum">1</em> / 2</div>
+        <button type="button" class="cases-arrow" id="casesNext" aria-label="Caso siguiente">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <div class="cases-track" id="casesTrack">
@@ -2105,21 +2166,21 @@ a { color: inherit; text-decoration: none; }
       <!-- CASO 1 -->
       <article class="case-slide" id="caseSlide0">
         <div class="case-slide-left">
-          <div class="case-name">Grupo Gire</div>
+          <div class="case-name">Gire</div>
           <div class="case-tag">Transporte de caudales</div>
         </div>
         <div class="case-slide-right">
           <div class="case-row">
-            <div class="case-row-label">Problema</div>
-            <div class="case-row-text">Flota de camiones blindados sin operar. SAP online sin señal dentro de bóvedas bancarias.</div>
+            <div class="case-row-label">Desafío</div>
+            <div class="case-row-text">La operación requería registrar información crítica incluso en entornos sin conectividad.</div>
           </div>
           <div class="case-row">
             <div class="case-row-label">Solución</div>
-            <div class="case-row-text">App mobile offline. Escaneo sin conexión y sincronización automática con Neptune Software.</div>
+            <div class="case-row-text">Desarrollamos una aplicación móvil offline integrada con SAP utilizando Neptune Software.</div>
           </div>
           <div class="case-row result">
             <div class="case-row-label">Resultado</div>
-            <div class="case-row-text"><span class="accent"><span data-count="80">80</span>%</span> menos tiempo de desarrollo · <span class="accent"><span data-count="30">30</span> días</span> de kick-off a producción</div>
+            <div class="case-row-text">Reducción del <span class="accent"><span data-count="80">80</span>%</span> en tiempos de desarrollo y puesta en producción en apenas <span class="accent"><span data-count="30">30</span> días</span>.</div>
           </div>
         </div>
       </article>
@@ -2127,21 +2188,21 @@ a { color: inherit; text-decoration: none; }
       <!-- CASO 2 -->
       <article class="case-slide" id="caseSlide1">
         <div class="case-slide-left">
-          <div class="case-name">Bunge<br>Argentina</div>
-          <div class="case-tag">Agronegocios · Commodities</div>
+          <div class="case-name">Molinos Río<br>de la Plata</div>
+          <div class="case-tag">Alimentos · Consumo masivo</div>
         </div>
         <div class="case-slide-right">
           <div class="case-row">
-            <div class="case-row-label">Problema</div>
-            <div class="case-row-text">Área completa de fertilizantes en Cobol legacy. Necesitaban migración total a SAP.</div>
+            <div class="case-row-label">Desafío</div>
+            <div class="case-row-text">Necesidad de optimizar procesos comerciales y operativos dentro del ecosistema SAP.</div>
           </div>
           <div class="case-row">
             <div class="case-row-label">Solución</div>
-            <div class="case-row-text">Migración a SD/MM, adaptación de flujos críticos y paneles de control automatizados.</div>
+            <div class="case-row-text">Implementación de mejoras funcionales y soporte especializado sobre los módulos críticos.</div>
           </div>
           <div class="case-row result">
             <div class="case-row-label">Resultado</div>
-            <div class="case-row-text"><span class="accent"><span data-count="3">3</span> módulos</span> implementados · <span class="accent"><span data-count="100">100</span>%</span> sobre estándares SAP nativos</div>
+            <div class="case-row-text"><span class="accent">Mayor eficiencia operativa</span> y mejor experiencia para los usuarios internos.</div>
           </div>
         </div>
       </article>
@@ -2153,7 +2214,8 @@ a { color: inherit; text-decoration: none; }
 <!-- EQUIPO -->
 <section class="team-section" id="equipo">
   <span class="section-label">// El equipo</span>
-  <h2 class="team-headline">Nuestros socios</h2>
+  <h2 class="team-headline">Liderado por profesionales<br>con experiencia comprobada</h2>
+  <p class="team-sub">Nuestro equipo combina experiencia funcional, técnica y estratégica adquirida en proyectos para algunas de las organizaciones más importantes de Latinoamérica.<br>Trabajamos con una premisa simple: entender el negocio antes de proponer una solución.</p>
 
   <div class="team-grid">
 
@@ -2223,8 +2285,8 @@ a { color: inherit; text-decoration: none; }
 <!-- CTA: AGENDAR REUNIÓN (Calendly embebido) -->
 <section class="cta-section" id="contacto">
   <div class="cta-head">
-    <h2 class="cta-headline">¿Tu sistema SAP está<br>frenando tu negocio?</h2>
-    <p class="cta-sub">Reservá un diagnóstico gratuito de 30 minutos.<br>Sin compromiso. Sin venta. Solo análisis técnico.</p>
+    <h2 class="cta-headline">¿SAP está acompañando<br>el crecimiento de tu empresa?</h2>
+    <p class="cta-sub">Si existen procesos manuales, tareas repetitivas, problemas de adopción o necesidades de movilidad, podemos ayudarte a identificar oportunidades de mejora.<br><br>Coordinemos una reunión y evaluemos juntos cómo optimizar tu operación.</p>
   </div>
 
   <!--
@@ -2430,9 +2492,13 @@ a { color: inherit; text-decoration: none; }
   }
 })();
 
-/* ============= NAV LOGO HOVER ============= */
+/* NAV LOGO HOVER — desactivado: el navLogoText fue eliminado del HTML
+   y el efecto flip generaba problemas de tipografía (espacios entre
+   letras, recortes de acentos). Si #navLogoText no existe en el DOM,
+   este bloque sale sin hacer nada — guard explícito. */
 (function() {
   const container = document.getElementById('navLogoText');
+  if (!container) return;
   const baseText = 'Simple Way';
   const altText = 'CONSULTORÍA SAP';
   const maxLen = Math.max(baseText.length, altText.length);
@@ -2590,13 +2656,76 @@ document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el
   window.addEventListener('scroll', scheduleScroll, { passive: true });
   window.addEventListener('resize', scheduleScroll, { passive: true });
   onScroll();
+
+  /* ----- Flechas prev / next -----
+   * Desktop: scroll programático que pone la sección en la posición
+   *   correspondiente al slide objetivo (cada slide = 1/N del scroll
+   *   total de la sección).
+   * Mobile: scrollIntoView del slide apilado verticalmente. */
+  const prevBtn = document.getElementById('casesPrev');
+  const nextBtn = document.getElementById('casesNext');
+
+  function currentIdx() {
+    if (isMobile()) {
+      // Cuál slide está más cerca del centro de la viewport
+      const vMid = window.innerHeight / 2;
+      let bestIdx = 0, bestDist = Infinity;
+      slides.forEach((s, i) => {
+        const r = s.getBoundingClientRect();
+        const d = Math.abs((r.top + r.height / 2) - vMid);
+        if (d < bestDist) { bestDist = d; bestIdx = i; }
+      });
+      return bestIdx;
+    }
+    return activeIdx < 0 ? 0 : activeIdx;
+  }
+
+  function goToSlide(idx) {
+    idx = Math.max(0, Math.min(slides.length - 1, idx));
+    if (isMobile()) {
+      slides[idx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    const rect = section.getBoundingClientRect();
+    const sectionTop = rect.top + window.scrollY;
+    const maxScroll = section.offsetHeight - window.innerHeight;
+    const ratio = slides.length > 1 ? (idx / (slides.length - 1)) : 0;
+    // Pequeño epsilon para asegurar que cruce el midpoint (idx >= 0.5)
+    const target = sectionTop + maxScroll * ratio + (idx > 0 ? 4 : 0);
+    window.scrollTo({ top: target, behavior: 'smooth' });
+  }
+
+  function updateArrows() {
+    if (!prevBtn || !nextBtn) return;
+    const i = currentIdx();
+    prevBtn.disabled = i <= 0;
+    nextBtn.disabled = i >= slides.length - 1;
+  }
+
+  if (prevBtn) prevBtn.addEventListener('click', () => goToSlide(currentIdx() - 1));
+  if (nextBtn) nextBtn.addEventListener('click', () => goToSlide(currentIdx() + 1));
+  // Actualizar estado disabled al cargar y al cambiar slide
+  updateArrows();
+  window.addEventListener('scroll', updateArrows, { passive: true });
+  window.addEventListener('resize', updateArrows, { passive: true });
 })();
 
 /* ============= DIFERENCIADORES SCROLLYTELLING ============= */
 (function() {
   const reasons = document.querySelectorAll('.diff-reason');
-  const progress = document.querySelectorAll('#diffProgress span');
+  // Soporta tanto la versión vieja (<span>) como la nueva (<button>):
+  // el paginador ahora es interactivo y dispara scrollIntoView al click.
+  const progress = document.querySelectorAll('#diffProgress > *');
   if (!reasons.length) return;
+
+  // Click handler: scroll suave al diff-reason correspondiente
+  progress.forEach(p => {
+    p.addEventListener('click', () => {
+      const step = p.dataset.step;
+      const target = document.querySelector('.diff-reason[data-step="' + step + '"]');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
 
   function animateCounter(el, targetStr) {
     const target = parseInt(targetStr, 10);
@@ -2653,7 +2782,7 @@ document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el
 /* ============= ABOUT WORD STAGGER ============= */
 (function() {
   const aboutEl = document.getElementById('aboutText');
-  const text = "Simple Way es una consultora SAP argentina. Más de 15 años de proyectos reales en agroindustria, finanzas, manufactura y servicios. Entregamos. Sin excusas.";
+  const text = "Simple Way es una consultora SAP argentina. Más de 15 años de proyectos reales en agroindustria, finanzas, manufactura y servicios.";
   const words = text.split(' ');
   words.forEach((w, i) => {
     const span = document.createElement('span');
@@ -2773,9 +2902,35 @@ document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el
     items.push({ s, sx, sy, node, path, motion });
   });
 
+  // Reposiciona cada nodo verticalmente para que el .node-icon (que
+  // visualmente representa "el servicio") quede exactamente sobre el
+  // punto (nx, ny) de la línea. Sin esto, el icon queda arriba y la
+  // línea termina entre icon y título (queda descentrado, sobre todo
+  // en mobile en el nodo de arriba — "Implementaciones SAP").
+  function centerNodes() {
+    items.forEach(it => {
+      // Reset al transform base para medir sin contaminación
+      it.node.style.transform = 'translate(-50%, -50%)';
+    });
+    // Forzar reflow una sola vez
+    void container.offsetHeight;
+    items.forEach(it => {
+      const iconEl = it.node.querySelector('.node-icon');
+      if (!iconEl) return;
+      const nRect = it.node.getBoundingClientRect();
+      const iRect = iconEl.getBoundingClientRect();
+      const nodeCy = nRect.top + nRect.height / 2;
+      const iconCy = iRect.top + iRect.height / 2;
+      // Si el icon cae a +dy del centro del nodo, hay que subir el
+      // nodo -dy para que el icon quede en el centro geométrico.
+      const dy = iconCy - nodeCy;
+      it.node.style.transform = 'translate(-50%, calc(-50% - ' + dy + 'px))';
+    });
+  }
+
   // Recalcula cada línea para que termine exactamente en el borde del
-  // .node-icon (no en el centro geométrico del .radial-node, que cae
-  // entre el icon y el título). Se ejecuta tras layout y en resize.
+  // .node-icon. Asume que centerNodes() ya corrió y que el icon está
+  // ahora visualmente sobre (nx, ny).
   function recalcLines() {
     const cRect = container.getBoundingClientRect();
     if (!cRect.width || !cRect.height) return;
@@ -2805,13 +2960,18 @@ document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el
     });
   }
 
+  function relayout() {
+    centerNodes();
+    recalcLines();
+  }
+
   // Layout-ready: rAF doble para que styles/fonts apliquen
-  requestAnimationFrame(() => requestAnimationFrame(recalcLines));
-  window.addEventListener('load', recalcLines);
+  requestAnimationFrame(() => requestAnimationFrame(relayout));
+  window.addEventListener('load', relayout);
   let resizeRaf = null;
   window.addEventListener('resize', () => {
     if (resizeRaf) cancelAnimationFrame(resizeRaf);
-    resizeRaf = requestAnimationFrame(recalcLines);
+    resizeRaf = requestAnimationFrame(relayout);
   });
 })();
 
