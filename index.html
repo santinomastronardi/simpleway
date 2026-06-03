@@ -215,35 +215,38 @@ a { color: inherit; text-decoration: none; }
   position: relative;
   display: inline-flex;
   overflow: hidden;
-  height: 22px;
+  height: 24px;
   font-size: 14px;
   font-weight: 500;
   letter-spacing: -0.01em;
-  line-height: 22px;
+  line-height: 24px;
 }
+/* Cada .letter es un mini-grid de 2 filas: top arriba, bottom abajo.
+   Como ambos hijos comparten celda en columna 1fr, el ancho de cada
+   .letter se ajusta al MÁS ANCHO entre top y bottom — sin esto, los
+   chars de "CONSULTORÍA SAP" colapsan sobre los del "Simple Way"
+   que es más corto. */
 .nav-logo-text .letter {
-  display: inline-block;
-  position: relative;
+  display: inline-grid;
+  grid-template-rows: 24px 24px;
+  grid-template-columns: minmax(0, max-content);
+  height: 24px;
   overflow: hidden;
-  height: 22px;
-}
-.nav-logo-text .letter span {
-  display: inline-block;
-  transition: transform 0.45s cubic-bezier(0.7, 0, 0.3, 1);
-  will-change: transform;
+  vertical-align: top;
 }
 .nav-logo-text .letter .top,
 .nav-logo-text .letter .bottom {
+  grid-column: 1;
   display: block;
-  line-height: 22px;
+  line-height: 24px;
+  white-space: pre; /* preserva los   (nbsp) que usamos como espacios */
+  transition: transform 0.45s cubic-bezier(0.7, 0, 0.3, 1);
+  will-change: transform;
 }
-.nav-logo-text .letter .bottom {
-  position: absolute;
-  left: 0;
-  top: 100%;
-}
-.nav-logo:hover .letter .top { transform: translateY(-100%); }
-.nav-logo:hover .letter .bottom { transform: translateY(-100%); }
+.nav-logo-text .letter .top    { grid-row: 1; }
+.nav-logo-text .letter .bottom { grid-row: 2; }
+.nav-logo:hover .letter .top,
+.nav-logo:hover .letter .bottom { transform: translateY(-24px); }
 
 .nav-links {
   display: flex;
@@ -1213,6 +1216,9 @@ a { color: inherit; text-decoration: none; }
   padding: 140px 80px;
   border-bottom: 1px solid var(--line);
   background: #fff;
+  /* Ancla #equipo: compensa el padding-top alto para que el título
+     no quede tan abajo en pantalla al hacer click en el nav. */
+  scroll-margin-top: -90px;
 }
 .team-headline {
   font-weight: 600;
@@ -1310,43 +1316,37 @@ a { color: inherit; text-decoration: none; }
 .team-placeholder-meta .team-name { color: rgba(0,0,0,0.35); }
 .team-placeholder-meta .team-bio  { color: rgba(0,0,0,0.3); font-style: italic; }
 
-/* ============ CTA FINAL ============ */
+/* ============ CTA FINAL + AGENDADOR (Calendly) ============ */
 .cta-section {
-  padding: 180px 80px;
+  padding: 120px 80px;
   text-align: center;
   background: #fff;
   border-bottom: 1px solid var(--line);
 }
+.cta-head { max-width: 760px; margin: 0 auto 48px; }
 .cta-headline {
   font-weight: 400;
   font-size: 4rem;
   line-height: 1.05;
   letter-spacing: -0.035em;
   margin-bottom: 24px;
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
 }
 .cta-sub {
   font-size: 18px;
   font-weight: 300;
   color: rgba(0,0,0,0.55);
-  margin-bottom: 44px;
+  line-height: 1.5;
 }
-.cta-button {
-  font-family: 'Funnel Display', sans-serif;
-  font-size: 16px;
-  font-weight: 500;
-  background: #000;
-  color: #fff;
-  padding: 18px 32px;
-  border-radius: 12px;
-  cursor: pointer;
-  border: none;
-  transition: background 0.2s ease, transform 0.2s ease;
-  margin-bottom: 50px;
+.calendly-wrap {
+  max-width: 920px;
+  margin: 0 auto 48px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #fff;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.06);
 }
-.cta-button:hover { background: var(--accent); transform: translateY(-1px); }
+.calendly-inline-widget { display: block; }
 .cta-info {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 12px;
@@ -1364,6 +1364,315 @@ a { color: inherit; text-decoration: none; }
 }
 .cta-links a { margin: 0 8px; transition: color 0.2s ease; }
 .cta-links a:hover { color: var(--accent); }
+
+/* ============ FLOATERS: BOT (¿Dudas?) + WHATSAPP ============
+ * Pareja flotante en la esquina inferior derecha.
+ * El bot es el CTA conversacional (abre un panel de chat).
+ * WhatsApp lleva directo a wa.me con texto prefilleado. */
+.floaters {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1100;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none; /* los hijos lo activan */
+}
+.floater { pointer-events: auto; font-family: 'Funnel Display', sans-serif; }
+
+/* ----- Bot pill (avatar + label "¿Dudas?") ----- */
+.floater-bot {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px 8px 8px;
+  background: #fff;
+  color: #0c1a30;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 100px;
+  box-shadow: 0 12px 28px rgba(12,26,48,0.18);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.floater-bot:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px rgba(12,26,48,0.22);
+  border-color: rgba(26,106,255,0.4);
+}
+.floater-bot:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+.floater-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #4d8eff);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+.floater-avatar svg { width: 22px; height: 22px; }
+.floater-label { white-space: nowrap; }
+/* Indicador "online" verde pulsante */
+.floater-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #2dd95e;
+  border: 2px solid #fff;
+  animation: floaterPulse 2.2s ease-in-out infinite;
+}
+@keyframes floaterPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(45,217,94,0.55); }
+  50%      { box-shadow: 0 0 0 6px rgba(45,217,94,0); }
+}
+
+/* ----- WhatsApp button ----- */
+.floater-wa {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #25D366;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 28px rgba(37,211,102,0.45);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.floater-wa:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 18px 36px rgba(37,211,102,0.55);
+}
+.floater-wa svg { width: 28px; height: 28px; display: block; }
+.floater-wa:focus-visible {
+  outline: 2px solid #128C7E;
+  outline-offset: 4px;
+}
+
+/* ============ BOT CHAT PANEL ============ */
+.bot-panel {
+  position: fixed;
+  right: 24px;
+  bottom: 96px;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  height: 520px;
+  max-height: calc(100vh - 130px);
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 24px 64px rgba(12,26,48,0.28);
+  z-index: 1101;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(16px) scale(0.96);
+  opacity: 0;
+  pointer-events: none;
+  transform-origin: bottom right;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.25s ease;
+}
+.bot-panel.is-open {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+.bot-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, var(--accent), #0050d8);
+  color: #fff;
+  flex-shrink: 0;
+}
+.bot-panel-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.bot-panel-avatar svg { width: 22px; height: 22px; color: #fff; }
+.bot-panel-avatar::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #2dd95e;
+  border: 2px solid #fff;
+}
+.bot-panel-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.bot-panel-meta strong { font-size: 14px; font-weight: 600; }
+.bot-panel-status {
+  font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: rgba(255,255,255,0.75);
+  margin-top: 2px;
+}
+.bot-panel-close {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.bot-panel-close:hover { background: rgba(255,255,255,0.15); }
+.bot-panel-close:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+.bot-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 16px;
+  background: #f6f8fb;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.bot-msg { display: flex; max-width: 88%; }
+.bot-msg-in  { align-self: flex-start; }
+.bot-msg-out { align-self: flex-end; }
+.bot-msg-bubble {
+  font-size: 14px;
+  line-height: 1.4;
+  padding: 10px 14px;
+  border-radius: 14px;
+  color: #0c1a30;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 2px 6px rgba(12,26,48,0.04);
+}
+.bot-msg-in  .bot-msg-bubble { border-bottom-left-radius: 4px; }
+.bot-msg-out .bot-msg-bubble {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  border-bottom-right-radius: 4px;
+}
+.bot-msg-bubble.is-typing {
+  display: inline-flex;
+  gap: 4px;
+  padding: 12px 14px;
+}
+.bot-msg-bubble.is-typing span {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.35);
+  animation: botType 1.2s ease-in-out infinite;
+}
+.bot-msg-bubble.is-typing span:nth-child(2) { animation-delay: 0.15s; }
+.bot-msg-bubble.is-typing span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes botType {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
+  30%           { transform: translateY(-4px); opacity: 1; }
+}
+
+.bot-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.bot-chip {
+  font-family: 'Funnel Display', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 7px 12px;
+  background: #fff;
+  border: 1px solid rgba(26,106,255,0.3);
+  color: var(--accent);
+  border-radius: 100px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.bot-chip:hover { background: var(--accent); color: #fff; }
+
+.bot-panel-foot {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background: #fff;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  flex-shrink: 0;
+}
+.bot-panel-foot input {
+  flex: 1;
+  font-family: 'Funnel Display', sans-serif;
+  font-size: 14px;
+  padding: 10px 14px;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 100px;
+  outline: none;
+  color: #0c1a30;
+  background: #f6f8fb;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.bot-panel-foot input:focus {
+  border-color: var(--accent);
+  background: #fff;
+}
+.bot-panel-foot button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.bot-panel-foot button:hover { background: var(--accent-hover); transform: scale(1.05); }
+.bot-panel-foot button svg { width: 18px; height: 18px; }
+
+/* En mobile achicamos un poco y damos espacio al nav pill */
+@media (max-width: 640px) {
+  .floaters { right: 16px; bottom: 80px; gap: 8px; }
+  .floater-bot { padding: 6px 14px 6px 6px; font-size: 13px; }
+  .floater-avatar { width: 32px; height: 32px; }
+  .floater-avatar svg { width: 20px; height: 20px; }
+  .floater-wa { width: 46px; height: 46px; }
+  .floater-wa svg { width: 24px; height: 24px; }
+  .bot-panel {
+    right: 12px;
+    left: 12px;
+    bottom: 150px;
+    width: auto;
+    max-width: none;
+    height: min(520px, calc(100vh - 200px));
+  }
+}
 
 /* ============ FOOTER ============ */
 .footer {
@@ -1489,8 +1798,12 @@ a { color: inherit; text-decoration: none; }
   }
   .logos-track {
     animation: scrollTrack 28s linear infinite;
+    /* Pausada por default — arranca recién al primer scroll del usuario.
+       La clase .has-scrolled la setea JS sobre <body>. */
+    animation-play-state: paused;
     will-change: transform;
   }
+  body.has-scrolled .logos-track { animation-play-state: running; }
   .logos-progress { display: none; }
 }
 
@@ -1616,7 +1929,7 @@ a { color: inherit; text-decoration: none; }
     <a href="#casos">Casos</a>
     <a href="#equipo">Equipo</a>
   </div>
-  <a href="#contacto" class="nav-cta">Hablar con un consultor</a>
+  <a href="https://wa.me/5491133871836?text=Hola%2C%20quer%C3%ADa%20hablar%20con%20un%20consultor%20de%20Simple%20Way" target="_blank" rel="noopener" class="nav-cta">Hablar con un consultor</a>
 </nav>
 
 <!-- HERO -->
@@ -1627,7 +1940,7 @@ a { color: inherit; text-decoration: none; }
     <h2 class="hero-sub-headline" id="heroSubHeadline">Sin excusas. Sin estimaciones que no se cumplen.</h2>
     <p class="hero-para" id="heroPara">Implementaciones, soporte y desarrollo SAP para empresas que no pueden permitirse que sus operaciones fallen.</p>
     <div class="hero-cta" id="heroCta">
-      <a href="#contacto" class="btn btn-primary">Diagnóstico gratuito →</a>
+      <a href="https://wa.me/5491133871836?text=Hola%2C%20quer%C3%ADa%20un%20diagn%C3%B3stico%20SAP%20gratuito" target="_blank" rel="noopener" class="btn btn-primary">Diagnóstico gratuito →</a>
       <a href="#casos" class="btn btn-ghost">Ver casos de éxito</a>
     </div>
     <div class="hero-stats" id="heroStats">
@@ -1907,14 +2220,41 @@ a { color: inherit; text-decoration: none; }
   </div>
 </section>
 
-<!-- CTA -->
+<!-- CTA: AGENDAR REUNIÓN (Calendly embebido) -->
 <section class="cta-section" id="contacto">
-  <h2 class="cta-headline">¿Tu sistema SAP está<br>frenando tu negocio?</h2>
-  <p class="cta-sub">El primer diagnóstico es sin costo y sin compromiso.</p>
-  <a href="mailto:info@simpleway.com.ar" class="cta-button" style="display:inline-block; text-decoration:none;">Agendar diagnóstico</a>
-  <div class="cta-info"><a href="mailto:info@simpleway.com.ar">info@simpleway.com.ar</a> · +54 9 11 3387-1836 · Buenos Aires, Argentina</div>
+  <div class="cta-head">
+    <h2 class="cta-headline">¿Tu sistema SAP está<br>frenando tu negocio?</h2>
+    <p class="cta-sub">Reservá un diagnóstico gratuito de 30 minutos.<br>Sin compromiso. Sin venta. Solo análisis técnico.</p>
+  </div>
+
+  <!--
+    Calendly inline widget.
+    TODO: reemplazar data-url por tu link real (ej: https://calendly.com/simple-way/diagnostico-sap).
+    Mientras tanto se ve un fallback con CTAs directos.
+  -->
+  <div class="calendly-wrap">
+    <div class="calendly-inline-widget"
+         data-url="https://calendly.com/simpleway-consulting/diagnostico-sap?hide_gdpr_banner=1&background_color=ffffff&text_color=0c1a30&primary_color=1a6aff"
+         style="min-width:320px;height:680px;"></div>
+    <noscript>
+      <p style="text-align:center;color:var(--ink-mute);">
+        Tu navegador bloqueó el agendador. Escribinos directo:
+        <a href="mailto:info@simpleway.com.ar">info@simpleway.com.ar</a>
+      </p>
+    </noscript>
+  </div>
+
+  <div class="cta-info">
+    <a href="mailto:info@simpleway.com.ar">info@simpleway.com.ar</a>
+    · <a href="https://wa.me/5491133871836" target="_blank" rel="noopener">+54 9 11 3387-1836</a>
+    · Buenos Aires, Argentina
+  </div>
   <div class="cta-links"><a href="#">LinkedIn</a> · <a href="#">Instagram</a></div>
 </section>
+
+<!-- Calendly widget script (carga async, no bloquea el render) -->
+<link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+<script src="https://assets.calendly.com/assets/external/widget.js" async></script>
 
 <!-- FOOTER -->
 <footer class="footer">
@@ -1929,8 +2269,109 @@ a { color: inherit; text-decoration: none; }
   </div>
 </footer>
 
+<!-- ============ FLOATERS: bot + whatsapp ============ -->
+<div class="floaters" id="floaters">
+  <!-- Bot pill: abre el panel de chat -->
+  <button class="floater floater-bot" id="botToggle" type="button"
+          aria-label="Abrir chat con Simple Bot"
+          aria-expanded="false" aria-controls="botPanel">
+    <span class="floater-avatar" aria-hidden="true">
+      <!-- Icono robot (Lucide stroke-only) -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+           stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="8" width="18" height="11" rx="3"/>
+        <path d="M12 4v4"/>
+        <circle cx="9" cy="13.5" r="1.2" fill="currentColor" stroke="none"/>
+        <circle cx="15" cy="13.5" r="1.2" fill="currentColor" stroke="none"/>
+        <path d="M8 19v2"/>
+        <path d="M16 19v2"/>
+        <circle cx="12" cy="3" r="1"/>
+      </svg>
+      <span class="floater-dot" aria-hidden="true"></span>
+    </span>
+    <span class="floater-label">¿Dudas?</span>
+  </button>
+
+  <!-- WhatsApp directo -->
+  <a class="floater floater-wa"
+     href="https://wa.me/5491133871836?text=Hola%2C%20me%20interesa%20Simple%20Way"
+     target="_blank" rel="noopener" aria-label="Hablar por WhatsApp">
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <path fill="#fff" d="M16.001 3C9.374 3 4 8.374 4 15c0 2.114.555 4.124 1.594 5.91L4 28l7.252-1.578A11.945 11.945 0 0016 27c6.626 0 12-5.374 12-12s-5.374-12-11.999-12zm0 21.6c-1.836 0-3.59-.516-5.094-1.495l-.36-.232-4.302.937.943-4.193-.234-.36A9.62 9.62 0 016.4 15c0-5.302 4.299-9.6 9.6-9.6 5.302 0 9.6 4.299 9.6 9.6.001 5.301-4.298 9.6-9.6 9.6zm5.59-7.21l-2.073-.62a.86.86 0 00-.776.157l-1.2.92c-1.246-.6-2.42-1.587-3.3-2.876l.795-1.157c.18-.262.214-.6.09-.892l-.821-1.937c-.176-.413-.577-.674-1.026-.674h-.94c-.5 0-.927.4-.97.9 0 5.04 4.157 9.197 9.197 9.197.5-.043.9-.47.9-.97v-.94c-.001-.45-.262-.85-.676-1.026z"/>
+    </svg>
+  </a>
+</div>
+
+<!-- ============ BOT PANEL ============ -->
+<div class="bot-panel" id="botPanel" role="dialog" aria-modal="false"
+     aria-labelledby="botPanelTitle" aria-hidden="true">
+  <header class="bot-panel-header">
+    <span class="bot-panel-avatar" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+           stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="8" width="18" height="11" rx="3"/>
+        <path d="M12 4v4"/>
+        <circle cx="9" cy="13.5" r="1.2" fill="currentColor" stroke="none"/>
+        <circle cx="15" cy="13.5" r="1.2" fill="currentColor" stroke="none"/>
+      </svg>
+    </span>
+    <div class="bot-panel-meta">
+      <strong id="botPanelTitle">Simple Bot</strong>
+      <span class="bot-panel-status">// En línea · Responde en segundos</span>
+    </div>
+    <button class="bot-panel-close" id="botClose" type="button" aria-label="Cerrar chat">×</button>
+  </header>
+
+  <div class="bot-panel-body" id="botBody">
+    <div class="bot-msg bot-msg-in">
+      <div class="bot-msg-bubble">¡Hola! Soy Simple Bot 🤖<br>¿Te ayudo con algo sobre Simple Way?</div>
+    </div>
+    <div class="bot-msg bot-msg-in">
+      <div class="bot-msg-bubble">Algunos temas frecuentes:</div>
+    </div>
+    <div class="bot-suggestions">
+      <button class="bot-chip" type="button" data-q="¿Qué módulos SAP implementan?">Módulos SAP</button>
+      <button class="bot-chip" type="button" data-q="¿Cuánto demora una implementación?">Tiempos</button>
+      <button class="bot-chip" type="button" data-q="¿Trabajan con apps mobile offline?">Apps offline</button>
+      <button class="bot-chip" type="button" data-q="Quiero agendar un diagnóstico">Agendar diagnóstico</button>
+    </div>
+  </div>
+
+  <form class="bot-panel-foot" id="botForm" autocomplete="off">
+    <input type="text" id="botInput" placeholder="Escribí tu pregunta..." aria-label="Tu pregunta">
+    <button type="submit" aria-label="Enviar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 2L11 13"/>
+        <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+      </svg>
+    </button>
+  </form>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
 <script>
+/* ============= FIRST-SCROLL FLAG =============
+ * Setea body.has-scrolled en el primer scroll del usuario.
+ * Lo usa el CSS de mobile para arrancar la animación del carrusel
+ * de logos sólo después de que el usuario haya interactuado. */
+(function() {
+  let armed = false;
+  function fire() {
+    if (armed) return;
+    armed = true;
+    document.body.classList.add('has-scrolled');
+    window.removeEventListener('scroll', fire);
+    window.removeEventListener('wheel', fire);
+    window.removeEventListener('touchstart', fire);
+    window.removeEventListener('keydown', fire);
+  }
+  window.addEventListener('scroll', fire, { once: true, passive: true });
+  window.addEventListener('wheel', fire, { once: true, passive: true });
+  window.addEventListener('touchstart', fire, { once: true, passive: true });
+  window.addEventListener('keydown', fire, { once: true });
+})();
+
 /* ============= PAGE LOADER → BRAND MARK (top-left)
  * Tras window.load + min 2s: aplica .is-done. El fondo se desvanece,
  * el logo viaja con un transform suave desde el centro a la esquina
@@ -2264,9 +2705,14 @@ document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el
   // El borde del círculo central (en viewBox) ~ 17% del 1000 = 170 → radio 85
   const CENTER_R = 85;
 
+  // Guardamos refs por servicio para recalcular líneas en runtime
+  // (los puntos en viewBox dependen del centro real del .node-icon,
+  // que sólo se conoce después del layout).
+  const items = [];
+
   services.forEach((s, i) => {
     const rad = s.angle * Math.PI / 180;
-    // Punto del nodo en viewBox
+    // Punto del nodo en viewBox (centro geométrico del .radial-node)
     const nx = CX + R * Math.cos(rad);
     const ny = CY - R * Math.sin(rad); // Y crece hacia abajo
     // Punto de salida del centro (en el borde del círculo)
@@ -2279,8 +2725,8 @@ document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el
     g.dataset.id = s.id;
 
     const path = document.createElementNS(NS, 'path');
-    const pathD = `M${sx} ${sy} L${nx} ${ny}`;
-    path.setAttribute('d', pathD);
+    const initialD = `M${sx} ${sy} L${nx} ${ny}`;
+    path.setAttribute('d', initialD);
     path.setAttribute('class', 'line-base');
     g.appendChild(path);
 
@@ -2294,7 +2740,7 @@ document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el
     const motion = document.createElementNS(NS, 'animateMotion');
     motion.setAttribute('dur', (2.6 + (i * 0.25)) + 's');
     motion.setAttribute('repeatCount', 'indefinite');
-    motion.setAttribute('path', pathD);
+    motion.setAttribute('path', initialD);
     motion.setAttribute('rotate', 'auto');
     dot.appendChild(motion);
 
@@ -2323,6 +2769,49 @@ document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el
       node.classList.remove('active');
       g.classList.remove('active');
     });
+
+    items.push({ s, sx, sy, node, path, motion });
+  });
+
+  // Recalcula cada línea para que termine exactamente en el borde del
+  // .node-icon (no en el centro geométrico del .radial-node, que cae
+  // entre el icon y el título). Se ejecuta tras layout y en resize.
+  function recalcLines() {
+    const cRect = container.getBoundingClientRect();
+    if (!cRect.width || !cRect.height) return;
+    const toViewX = (px) => (px - cRect.left) / cRect.width * 1000;
+    const toViewY = (px) => (px - cRect.top) / cRect.height * 1000;
+    const GAP = 4; // unidades del viewBox de aire entre línea e icono
+
+    items.forEach(it => {
+      const iconEl = it.node.querySelector('.node-icon');
+      if (!iconEl) return;
+      const iRect = iconEl.getBoundingClientRect();
+      const icx = toViewX(iRect.left + iRect.width / 2);
+      const icy = toViewY(iRect.top + iRect.height / 2);
+      // Radio del icono en unidades del viewBox (asumiendo SVG cuadrado)
+      const iconR = (iRect.width / 2) / cRect.width * 1000;
+
+      const dx = icx - it.sx;
+      const dy = icy - it.sy;
+      const dist = Math.hypot(dx, dy);
+      if (dist <= iconR + GAP) return; // demasiado cerca, no dibujamos
+      const t = (dist - iconR - GAP) / dist;
+      const ex = it.sx + dx * t;
+      const ey = it.sy + dy * t;
+      const d = `M${it.sx} ${it.sy} L${ex} ${ey}`;
+      it.path.setAttribute('d', d);
+      it.motion.setAttribute('path', d);
+    });
+  }
+
+  // Layout-ready: rAF doble para que styles/fonts apliquen
+  requestAnimationFrame(() => requestAnimationFrame(recalcLines));
+  window.addEventListener('load', recalcLines);
+  let resizeRaf = null;
+  window.addEventListener('resize', () => {
+    if (resizeRaf) cancelAnimationFrame(resizeRaf);
+    resizeRaf = requestAnimationFrame(recalcLines);
   });
 })();
 
@@ -3187,6 +3676,143 @@ startTechCanvas('tech-canvas');
       }
     });
   }, { passive: true });
+})();
+
+/* ============= BOT CHAT PANEL =============
+ * Manejo del panel:
+ *  - Toggle vía bot button / close button.
+ *  - ESC cierra.
+ *  - Chips de sugerencias y form input mandan un mensaje del usuario.
+ *  - Sin LLM aún → respuesta canned: el bot ofrece pasar al humano por
+ *    WhatsApp con el texto prefilleado. Cuando conectemos el LLM acá
+ *    se reemplaza `botReply()` por el fetch al endpoint.
+ * ============= */
+(function() {
+  const toggle = document.getElementById('botToggle');
+  const panel  = document.getElementById('botPanel');
+  const closeBtn = document.getElementById('botClose');
+  const body   = document.getElementById('botBody');
+  const form   = document.getElementById('botForm');
+  const input  = document.getElementById('botInput');
+  if (!toggle || !panel || !body || !form) return;
+
+  const WA_NUMBER = '5491133871836';
+
+  function openPanel() {
+    panel.classList.add('is-open');
+    panel.setAttribute('aria-hidden', 'false');
+    toggle.setAttribute('aria-expanded', 'true');
+    setTimeout(() => input.focus(), 250);
+  }
+  function closePanel() {
+    panel.classList.remove('is-open');
+    panel.setAttribute('aria-hidden', 'true');
+    toggle.setAttribute('aria-expanded', 'false');
+  }
+  function togglePanel() {
+    panel.classList.contains('is-open') ? closePanel() : openPanel();
+  }
+
+  toggle.addEventListener('click', togglePanel);
+  closeBtn.addEventListener('click', closePanel);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && panel.classList.contains('is-open')) closePanel();
+  });
+
+  function scrollToBottom() {
+    body.scrollTop = body.scrollHeight;
+  }
+
+  function appendMessage(text, side) {
+    const wrap = document.createElement('div');
+    wrap.className = 'bot-msg ' + (side === 'out' ? 'bot-msg-out' : 'bot-msg-in');
+    const bubble = document.createElement('div');
+    bubble.className = 'bot-msg-bubble';
+    // text puede ser string o HTMLNode (para botones embedded)
+    if (typeof text === 'string') bubble.textContent = text;
+    else bubble.appendChild(text);
+    wrap.appendChild(bubble);
+    body.appendChild(wrap);
+    scrollToBottom();
+    return wrap;
+  }
+
+  function showTyping() {
+    const wrap = document.createElement('div');
+    wrap.className = 'bot-msg bot-msg-in';
+    const bubble = document.createElement('div');
+    bubble.className = 'bot-msg-bubble is-typing';
+    bubble.innerHTML = '<span></span><span></span><span></span>';
+    wrap.appendChild(bubble);
+    body.appendChild(wrap);
+    scrollToBottom();
+    return wrap;
+  }
+
+  function botReply(userMessage) {
+    const typing = showTyping();
+    setTimeout(() => {
+      typing.remove();
+      appendMessage(
+        'Gracias por tu pregunta. Para darte una respuesta precisa, te conecto con un consultor por WhatsApp 👇',
+        'in'
+      );
+
+      // CTA inline con el mensaje del user prefilleado
+      const ctaWrap = document.createElement('div');
+      ctaWrap.style.alignSelf = 'flex-start';
+      ctaWrap.style.marginTop = '4px';
+      const link = document.createElement('a');
+      link.href = 'https://wa.me/' + WA_NUMBER + '?text=' +
+                  encodeURIComponent('Hola Simple Way, mi consulta es: ' + userMessage);
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.textContent = 'Abrir WhatsApp →';
+      link.className = 'bot-chip';
+      link.style.borderColor = '#25D366';
+      link.style.color = '#25D366';
+      link.style.textDecoration = 'none';
+      link.addEventListener('mouseenter', () => {
+        link.style.background = '#25D366';
+        link.style.color = '#fff';
+      });
+      link.addEventListener('mouseleave', () => {
+        link.style.background = '';
+        link.style.color = '#25D366';
+      });
+      ctaWrap.appendChild(link);
+      body.appendChild(ctaWrap);
+      scrollToBottom();
+    }, 700);
+  }
+
+  function send(text) {
+    const t = String(text || '').trim();
+    if (!t) return;
+    appendMessage(t, 'out');
+    input.value = '';
+    botReply(t);
+  }
+
+  // Chips de sugerencias
+  body.addEventListener('click', (e) => {
+    const chip = e.target.closest('.bot-chip');
+    if (!chip || !chip.dataset.q) return;
+    send(chip.dataset.q);
+  });
+
+  // Form submit
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    send(input.value);
+  });
+
+  // Click afuera cierra el panel
+  document.addEventListener('click', (e) => {
+    if (!panel.classList.contains('is-open')) return;
+    if (panel.contains(e.target) || toggle.contains(e.target)) return;
+    closePanel();
+  });
 })();
 </script>
 </body>
